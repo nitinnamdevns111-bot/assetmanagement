@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AMS — Asset Management</title>
+    <!-- Professional Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --ink: #111827;
+            --ink-soft: #374151;
+            --surface: #f9fafb;
+            --surface-2: #f3f4f6;
+            --white: #ffffff;
+            --accent: #dc2626;
+            --accent-glow: #ef4444;
+            --accent-soft: #fee2e2;
+            --gold: #d97706;
+            --gold-soft: #fef3c7;
+            --danger: #b91c1c;
+            --danger-soft: #fef2f2;
+            --success: #059669;
+            --success-soft: #d1fae5;
+            --border: #e5e7eb;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--ink); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3, h4, .heading { font-family: 'Roboto', sans-serif; letter-spacing: -0.01em; }
+        
+        /* Smooth Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; transition: background 0.3s; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* General Smooth Transitions */
+        .btn, .input, select, .nav-btn, .stat-card, .dropzone {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #global-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; transition: opacity 0.3s; }
+        #global-loader.hidden { display: none; opacity: 0; }
+        .loader-ring { width: 40px; height: 40px; border: 3px solid var(--accent-soft); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loader-text { font-size: 14px; font-weight: 500; color: var(--ink-soft); }
+
+        #progress-wrap { width: 220px; text-align: center; margin-top: 12px; transition: opacity 0.3s; }
+        .progress-track { height: 6px; background: rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-text { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-top: 8px; font-family: 'Roboto', sans-serif; }
+
+        .auth-view { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100; background: var(--ink); overflow: hidden; }
+        .auth-bg { position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(220,38,38,0.15), transparent 50%), var(--ink); }
+        .auth-card { position: relative; z-index: 2; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 20px; padding: 40px; width: 100%; max-width: 400px; margin: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: fadeIn 0.5s ease-out both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .auth-logo { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), #f87171); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; margin: 0 auto 20px; box-shadow: 0 8px 16px rgba(220,38,38,0.3); }
+        .auth-title { font-size: 24px; font-weight: 900; color: #fff; text-align: center; }
+        .auth-sub { font-size: 14px; color: #9ca3af; text-align: center; margin-top: 4px; margin-bottom: 24px; }
+        .auth-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .auth-input-wrap { position: relative; margin-bottom: 16px; }
+        .auth-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 14px; pointer-events: none; }
+        .auth-input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); color: #fff; padding: 10px 14px 10px 38px; font-size: 14px; outline: none; font-family: 'Inter', sans-serif; }
+        .auth-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+        .auth-btn { width: 100%; padding: 12px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; border: none; border-radius: var(--radius-sm); cursor: pointer; margin-top: 8px; }
+        .auth-btn:hover { background: var(--accent-glow); box-shadow: 0 4px 12px rgba(220,38,38,0.3); transform: translateY(-1px); }
+        .auth-toggle { text-align: center; margin-top: 20px; font-size: 13px; color: #9ca3af; }
+        .auth-toggle a { color: var(--accent-glow); text-decoration: none; font-weight: 500; cursor: pointer; transition: color 0.2s; }
+        .auth-toggle a:hover { color: #f87171; text-decoration: underline; }
+        .auth-error { background: rgba(185,28,28,0.2); border: 1px solid rgba(185,28,28,0.4); border-radius: var(--radius-sm); padding: 10px 14px; color: #fca5a5; font-size: 13px; margin-bottom: 16px; display: none; }
+
+        #app-view { display: flex; height: 100dvh; width: 100%; overflow: hidden; }
+        .sidebar { width: 260px; background: var(--ink); display: flex; flex-direction: column; flex-shrink: 0; z-index: 20; }
+        .sidebar-brand { padding: 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .brand-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; font-weight: bold; }
+        .brand-name { font-family: 'Roboto', sans-serif; font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 0.02em; }
+        
+        .user-profile-sm { padding: 16px 24px; display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
+        .user-info-sm { display: flex; flex-direction: column; }
+        .user-name-sm { color: #fff; font-size: 14px; font-weight: 600; }
+        .user-role-sm { color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+
+        .sidebar-nav { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+        .nav-section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #6b7280; padding: 0 8px; margin: 16px 0 8px; }
+        
+        .nav-btn { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm); border: none; background: transparent; color: #d1d5db; font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; }
+        .nav-btn i { width: 20px; text-align: center; font-size: 16px; color: #9ca3af; transition: color 0.2s; }
+        .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.05); transform: translateX(4px); }
+        .nav-btn.active { color: #fff; background: rgba(220,38,38,0.15); }
+        .nav-btn.active i { color: var(--accent-glow); }
+
+        .sidebar-footer { padding: 16px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .logout-btn { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm); border: none; background: transparent; color: #9ca3af; font-size: 14px; font-weight: 500; cursor: pointer; width: 100%; text-align: left; transition: all 0.2s; }
+        .logout-btn:hover { color: #fca5a5; background: rgba(185,28,28,0.1); transform: translateX(4px); }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); }
+        .mobile-header { display: none; padding: 12px 16px; background: var(--white); border-bottom: 1px solid var(--border); align-items: center; justify-content: space-between; z-index: 30; }
+        .hamburger-btn { border: none; background: transparent; font-size: 20px; color: var(--ink-soft); cursor: pointer; }
+        .mobile-menu { position: absolute; top: 56px; left: 0; right: 0; background: var(--white); border-bottom: 1px solid var(--border); z-index: 25; box-shadow: var(--shadow-lg); display: none; flex-direction: column; }
+        .mobile-menu.show { display: flex; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .mobile-nav-btn { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--ink-soft); font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: transparent; text-align: left; border-bottom: 1px solid var(--surface-2); transition: background 0.2s; }
+        .mobile-nav-btn:hover { background: var(--surface); }
+        .mobile-nav-btn i { width: 20px; color: var(--accent); }
+
+        .content-scroll { flex: 1; overflow-y: auto; padding: 32px; scroll-behavior: smooth; }
+        @media (max-width: 767px) { .sidebar { display: none !important; } .mobile-header { display: flex !important; } .content-scroll { padding: 20px 16px 80px; } }
+
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; animation: fadeIn 0.4s ease; }
+        .page-title { font-size: 28px; font-weight: 900; color: var(--ink); letter-spacing: -0.02em; }
+        .page-sub { font-size: 14px; color: var(--ink-soft); margin-top: 4px; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 28px; }
+        .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-sm); cursor: default; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: #d1d5db; }
+        .stat-card.clickable { cursor: pointer; }
+        .stat-label { font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
+        .stat-value { font-family: 'Roboto', sans-serif; font-size: 40px; font-weight: 900; line-height: 1; color: var(--ink); }
+        .stat-icon { position: absolute; right: -10px; bottom: -10px; font-size: 80px; opacity: 0.04; color: var(--ink); transition: transform 0.4s ease; }
+        .stat-card:hover .stat-icon { transform: scale(1.1) rotate(-5deg); }
+        .stat-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 6px; margin-top: 12px; }
+        .stat-card.red .stat-badge { background: var(--accent-soft); color: var(--danger); }
+        .stat-card.yellow .stat-badge { background: var(--gold-soft); color: #92400e; }
+        .stat-card.green .stat-badge { background: var(--success-soft); color: var(--success); }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; border: none; text-decoration: none; outline: none; }
+        .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 4px rgba(220,38,38,0.2); }
+        .btn-primary:hover { background: var(--accent-glow); box-shadow: 0 4px 10px rgba(220,38,38,0.3); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(220,38,38,0.2); }
+        .btn-success { background: var(--success); color: #fff; box-shadow: 0 2px 4px rgba(5,150,105,0.2); }
+        .btn-success:hover { background: #047857; box-shadow: 0 4px 10px rgba(5,150,105,0.3); transform: translateY(-1px); }
+        .btn-ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--border); }
+        .btn-ghost:hover { background: var(--surface-2); color: var(--ink); border-color: #d1d5db; }
+
+        .table-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); animation: fadeIn 0.5s ease; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; text-align: left; }
+        thead { background: var(--surface); border-bottom: 1px solid var(--border); }
+        thead th { padding: 12px 16px; font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; transition: color 0.2s; }
+        thead th:hover .sort-icon { color: var(--ink-soft); }
+        tbody tr { border-bottom: 1px solid var(--surface-2); transition: all 0.2s ease; }
+        tbody tr:hover { background: var(--surface); transform: scale(1.002); box-shadow: 0 2px 8px rgba(0,0,0,0.04); z-index: 10; position: relative; }
+        tbody td { padding: 14px 16px; vertical-align: middle; font-size: 14px; color: var(--ink); }
+
+        .filter-row { background: var(--white); border-bottom: 2px solid var(--border); }
+        .filter-row th { padding: 8px 16px; }
+        .filter-input-sm { width: 100%; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; outline: none; font-family: 'Inter', sans-serif; background: var(--surface); }
+        .filter-input-sm:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 2px var(--accent-soft); }
+        .sort-icon { margin-left: 4px; color: #cbd5e1; font-size: 10px; transition: color 0.2s; }
+        .sort-icon.active { color: var(--accent); }
+
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+        .badge-valid { background: var(--success-soft); color: var(--success); }
+        .badge-warning { background: var(--gold-soft); color: #b45309; }
+        .badge-danger { background: var(--danger-soft); color: var(--danger); }
+        .badge-neutral { background: var(--surface-2); color: var(--ink-soft); }
+        .badge-open { background: var(--gold-soft); color: #b45309; }
+        .badge-resolved { background: var(--success-soft); color: var(--success); }
+
+        .form-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); animation: fadeIn 0.4s ease; }
+        .form-section-title { font-size: 15px; font-weight: 600; color: var(--ink); padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+        .form-section-title i { color: var(--accent); }
+        .form-grid { display: grid; gap: 16px; }
+        .form-grid-2 { grid-template-columns: 1fr 1fr; }
+        .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+        @media (max-width: 768px) { .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; } }
+        
+        label { font-size: 13px; font-weight: 500; color: var(--ink-soft); display: block; margin-bottom: 6px; }
+        .input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; color: var(--ink); outline: none; font-family: 'Inter', sans-serif; background: var(--surface); }
+        .input:focus { border-color: var(--accent); background: var(--white); box-shadow: 0 0 0 3px var(--accent-soft); }
+        
+        .sp-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; position: relative; margin-bottom: 12px; }
+        .remove-sp-btn { position: absolute; top: 16px; right: 16px; color: var(--danger); cursor: pointer; border: none; background: transparent; font-size: 14px; transition: transform 0.2s; }
+        .remove-sp-btn:hover { transform: scale(1.1) rotate(90deg); }
+        .add-sp-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--accent); cursor: pointer; border: 1px dashed var(--accent); background: var(--accent-soft); padding: 8px 12px; border-radius: var(--radius-sm); width: 100%; justify-content: center; }
+        .add-sp-btn:hover { background: #fecaca; }
+
+        .dropzone { border: 2px dashed var(--border); border-radius: var(--radius-sm); background: var(--surface); min-height: 120px; display: flex; align-items: center; justify-content: center; position: relative; text-align: center; }
+        .dropzone:hover { border-color: var(--accent); background: var(--accent-soft); }
+        .dz-content { pointer-events: none; }
+        .dz-icon { font-size: 24px; color: var(--ink-soft); margin-bottom: 8px; transition: transform 0.3s; }
+        .dropzone:hover .dz-icon { transform: translateY(-4px); color: var(--accent); }
+        .dz-link { pointer-events: all; font-size: 13px; font-weight: 500; color: var(--accent); cursor: pointer; }
+        .dz-preview { display: none; width: 100%; padding: 12px; align-items: center; justify-content: space-between; gap: 12px; animation: fadeIn 0.3s; }
+        .dz-preview.show { display: flex; }
+        .dz-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+        .dz-file-name { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; text-align: left; }
+        .dz-remove { width: 28px; height: 28px; border-radius: 6px; background: var(--danger-soft); color: var(--danger); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+        .dz-remove:hover { background: #fecaca; }
+
+        .toast { position: fixed; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; z-index: 300; box-shadow: var(--shadow-xl); animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .toast.success { background: var(--ink); color: #fff; border-left: 4px solid var(--success); }
+        .toast.error { background: var(--ink); color: #fff; border-left: 4px solid var(--danger); }
+
+        .modal-wrap { position: fixed; inset: 0; z-index: 150; display: none; align-items: center; justify-content: center; padding: 16px; }
+        .modal-wrap.show { display: flex; }
+        .modal-backdrop { position: absolute; inset: 0; background: rgba(17,24,39,0.7); backdrop-filter: blur(4px); animation: fadeIn 0.3s; }
+        .modal-box { position: relative; z-index: 2; background: var(--white); border-radius: 16px; box-shadow: var(--shadow-xl); width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) both; }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+        .modal-title { font-size: 18px; font-weight: 700; color: var(--ink); }
+        .modal-close { width: 32px; height: 32px; border-radius: 8px; background: var(--surface); border: none; color: var(--ink-soft); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .modal-close:hover { background: var(--danger-soft); color: var(--danger); transform: rotate(90deg); }
+        .modal-body { flex: 1; padding: 24px; overflow:y: auto; background: var(--surface); display: flex; flex-direction: column; gap: 16px; }
+        
+        .empty-state { padding: 48px 24px; text-align: center; display: none; flex-direction: column; align-items: center; animation: fadeIn 0.4s ease; }
+        .empty-state.show { display: flex; }
+        .empty-icon { width: 64px; height: 64px; background: var(--surface-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #9ca3af; margin-bottom: 16px; }
+
+        .hidden { display: none !important; }
+        .view-layer { display: none; }
+        .view-layer.active { display: block; animation: fadeIn 0.4s ease-out both; }
+        
+        .admin-only, .sub-admin-only, .non-admin { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="global-loader" class="hidden">
+    <div class="loader-ring"></div>
+    <span id="loader-text">Loading...</span>
+    <div id="progress-wrap" class="hidden">
+        <div class="progress-track">
+            <div id="loader-progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="loader-percentage" class="progress-text">0%</div>
+    </div>
+</div>
+
+<div id="auth-view" class="auth-view">
+    <div class="auth-bg"></div>
+    <!-- LOGIN FORM -->
+    <div class="auth-card" id="login-card">
+        <div class="auth-logo"><i class="fas fa-boxes"></i></div>
+        <h1 class="auth-title">AMS Login</h1>
+        <p class="auth-sub">Sign in to manage assets & issues</p>
+        <div id="login-error" class="auth-error"><i class="fas fa-circle-exclamation"></i> <span id="login-error-text">Invalid credentials</span></div>
+        <form id="login-form">
+            <label class="auth-label">User ID</label>
+            <div class="auth-input-wrap">
+                <i class="auth-input-icon fas fa-user"></i>
+                <input type="text" id="login-userId" class="auth-input" placeholder="Enter your ID" required>
+            </div>
+            <label class="auth-label">Password</label>
+            <div class="auth-input-wrap">
+                <i class="auth-input-icon fas fa-lock"></i>
+                <input type="password" id="login-password" class="auth-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="auth-btn">Sign In</button>
+        </form>
+        <div class="auth-toggle">New here? <a onclick="toggleAuth('register')">Create an account</a></div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="auth-card hidden" id="register-card">
+        <div class="auth-logo"><i class="fas fa-user-plus"></i></div>
+        <h1 class="auth-title">Register</h1>
+        <p class="auth-sub">Create a new user account</p>
+        <div id="reg-error" class="auth-error"><i class="fas fa-circle-exclamation"></i> <span id="reg-error-text">Error</span></div>
+        <form id="register-form">
+            <label class="auth-label">Full Name</label>
+            <div class="auth-input-wrap">
+                <i class="auth-input-icon fas fa-id-badge"></i>
+                <input type="text" id="reg-name" class="auth-input" placeholder="John Doe" required>
+            </div>
+            <label class="auth-label">Desired User ID</label>
+            <div class="auth-input-wrap">
+                <i class="auth-input-icon fas fa-user"></i>
+                <input type="text" id="reg-userId" class="auth-input" placeholder="johndoe123" required>
+            </div>
+            <label class="auth-label">Password</label>
+            <div class="auth-input-wrap">
+                <i class="auth-input-icon fas fa-lock"></i>
+                <input type="password" id="reg-password" class="auth-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="auth-btn">Register</button>
+        </form>
+        <div class="auth-toggle">Already registered? <a onclick="toggleAuth('login')">Sign In</a></div>
+    </div>
+</div>
+
+<div id="app-view" class="hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-boxes"></i></div>
+            <div class="brand-name">AMS</div>
+        </div>
+        <div class="user-profile-sm">
+            <div class="user-avatar" id="sidebar-avatar">U</div>
+            <div class="user-info-sm">
+                <div class="user-name-sm" id="sidebar-name">User Name</div>
+                <div class="user-role-sm" id="sidebar-role">Role</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Admin Only Links -->
+            <div class="admin-only">
+                <div class="nav-section-label">Management</div>
+                <button onclick="switchView('dashboard')" data-view="dashboard" class="nav-btn active"><i class="fas fa-chart-pie"></i> Dashboard</button>
+                <button onclick="switchView('assets')" data-view="assets" class="nav-btn"><i class="fas fa-list-ul"></i> All Assets</button>
+                <button onclick="openAddAssetForm()" data-view="add-asset" class="nav-btn"><i class="fas fa-plus"></i> Add Asset</button>
+                <div class="nav-section-label">Redressal</div>
+                <button onclick="switchView('admin-tickets')" data-view="admin-tickets" class="nav-btn"><i class="fas fa-ticket-alt"></i> All Tickets</button>
+                <div class="nav-section-label">System</div>
+                <button onclick="switchView('admin-users')" data-view="admin-users" class="nav-btn"><i class="fas fa-users"></i> Users</button>
+            </div>
+
+            <!-- Sub-Admin Additions -->
+            <div class="sub-admin-only">
+                <div class="nav-section-label">Management</div>
+                <button onclick="openAddAssetForm()" data-view="add-asset" class="nav-btn"><i class="fas fa-plus"></i> Add Asset</button>
+            </div>
+
+            <!-- User & Sub-Admin Only Links -->
+            <div class="non-admin">
+                <div class="nav-section-label">My Access</div>
+                <button onclick="switchView('my-assets')" data-view="my-assets" class="nav-btn active"><i class="fas fa-laptop"></i> My Assets</button>
+                <div class="nav-section-label">Redressal System</div>
+                <button onclick="switchView('report-issue')" data-view="report-issue" class="nav-btn"><i class="fas fa-triangle-exclamation"></i> Report Issue</button>
+                <button onclick="switchView('user-tickets')" data-view="user-tickets" class="nav-btn"><i class="fas fa-list-check"></i> My Tickets</button>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+        </div>
+    </aside>
+
+    <div class="main-content">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <div class="brand-icon" style="width:28px;height:28px;font-size:12px;"><i class="fas fa-boxes"></i></div>
+                <div class="brand-name" style="color:var(--ink);font-size:18px;">AMS</div>
+            </div>
+            <button class="hamburger-btn" onclick="document.getElementById('mobile-menu').classList.toggle('show')"><i class="fas fa-bars"></i></button>
+        </header>
+        
+        <div id="mobile-menu" class="mobile-menu"></div>
+
+        <div class="content-scroll" id="content-scroll">
+            
+            <!-- Admin Dashboard -->
+            <div id="view-dashboard" class="view-layer active">
+                <div class="page-header">
+                    <div><h2 class="page-title">Dashboard</h2><p class="page-sub">Overview of your tracked assets</p></div>
+                    <button class="btn btn-ghost" onclick="fetchData()"><i class="fas fa-rotate"></i> Refresh</button>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Assets</div>
+                        <div class="stat-value" id="stat-total">0</div>
+                        <div class="stat-badge bg-gray-100 text-gray-700"><i class="fas fa-boxes"></i> In System</div>
+                        <i class="fas fa-boxes stat-icon"></i>
+                    </div>
+                    <div class="stat-card yellow clickable" onclick="filterAssets('service')">
+                        <div class="stat-label">Service Due</div>
+                        <div class="stat-value" id="stat-service">0</div>
+                        <div class="stat-badge"><i class="fas fa-tools"></i> Within 30 days</div>
+                        <i class="fas fa-wrench stat-icon"></i>
+                    </div>
+                    <div class="stat-card red clickable" onclick="filterAssets('warranty')">
+                        <div class="stat-label">Warranty Ending</div>
+                        <div class="stat-value" id="stat-warranty">0</div>
+                        <div class="stat-badge"><i class="fas fa-shield"></i> Within 30 days</div>
+                        <i class="fas fa-shield-alt stat-icon"></i>
+                    </div>
+                    <div class="stat-card red clickable" onclick="filterTickets('Open')">
+                        <div class="stat-label">Open Tickets</div>
+                        <div class="stat-value" id="stat-tickets">0</div>
+                        <div class="stat-badge"><i class="fas fa-ticket"></i> Action required</div>
+                        <i class="fas fa-ticket-alt stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Asset Directory -->
+            <div id="view-assets" class="view-layer">
+                <div class="page-header">
+                    <div><h2 class="page-title">Asset Directory</h2><p class="page-sub" id="list-subtitle">Showing all active assets</p></div>
+                    <div style="display:flex;gap:10px; align-items:center;">
+                        <span id="asset-count-badge" style="font-size:14px; font-weight:600; color:var(--ink-soft); margin-right: 8px;">Count: 0</span>
+                        <button id="clear-filter-btn" onclick="clearAssetFilters()" class="btn btn-ghost hidden"><i class="fas fa-times"></i> Clear Filter</button>
+                        <button onclick="openAddAssetForm()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Asset</button>
+                        <button class="btn btn-ghost" onclick="fetchData()"><i class="fas fa-rotate"></i></button>
+                    </div>
+                </div>
+                <div class="table-card">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th onclick="sortAssets('AssetID', 'assets')" style="cursor:pointer">ASSET ID <i class="fas fa-sort sort-icon" id="sort-assets-AssetID"></i></th>
+                                    <th onclick="sortAssets('name', 'assets')" style="cursor:pointer">ASSET <i class="fas fa-sort sort-icon" id="sort-assets-name"></i></th>
+                                    <th onclick="sortAssets('assignedName', 'assets')" style="cursor:pointer">ASSIGNMENT <i class="fas fa-sort sort-icon" id="sort-assets-assignedName"></i></th>
+                                    <th onclick="sortAssets('warrantyDate', 'assets')" style="cursor:pointer">WARRANTY <i class="fas fa-sort sort-icon" id="sort-assets-warrantyDate"></i></th>
+                                    <th onclick="sortAssets('serviceDate', 'assets')" style="cursor:pointer">NEXT SERVICE <i class="fas fa-sort sort-icon" id="sort-assets-serviceDate"></i></th>
+                                    <th>SERVICE PROVIDER</th>
+                                    <th>STATUS</th>
+                                    <th>OWNERSHIP</th>
+                                    <th>ACTION</th>
+                                </tr>
+                                <tr class="filter-row">
+                                    <th><input type="text" class="filter-input-sm" id="filt-asset-id" placeholder="Filter ID..." oninput="renderAssets()"></th>
+                                    <th><input type="text" class="filter-input-sm" id="filt-asset" placeholder="Filter Asset or SN..." oninput="renderAssets()"></th>
+                                    <th><input type="text" class="filter-input-sm" id="filt-assign" placeholder="Name/Dept/Cabin..." oninput="renderAssets()"></th>
+                                    <th><input type="date" class="filter-input-sm" id="filt-war" onchange="renderAssets()"></th>
+                                    <th><input type="date" class="filter-input-sm" id="filt-svc" onchange="renderAssets()"></th>
+                                    <th><input type="text" class="filter-input-sm" id="filt-sp" placeholder="Filter Provider..." oninput="renderAssets()"></th>
+                                    <th>
+                                        <select class="filter-input-sm" id="filt-status" onchange="renderAssets()">
+                                            <option value="">All</option>
+                                            <option value="working">Working</option>
+                                            <option value="non-working">Non-Working</option>
+                                        </select>
+                                    </th>
+                                    <th>
+                                        <select class="filter-input-sm" id="filt-ownership" onchange="renderAssets()">
+                                            <option value="">All</option>
+                                            <option value="own">Owned</option>
+                                            <option value="rented">Rented</option>
+                                        </select>
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="asset-table-body"></tbody>
+                        </table>
+                    </div>
+                    <div id="asset-empty" class="empty-state show">
+                        <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:4px;">No assets found</h3>
+                        <p style="font-size:13px;color:var(--ink-soft);max-width:300px;">Adjust your filters or add a new asset to get started.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-Admin / User: My Assets -->
+            <div id="view-my-assets" class="view-layer">
+                <div class="page-header">
+                    <div><h2 class="page-title">My Assets</h2><p class="page-sub">Equipment currently assigned to you</p></div>
+                    <button class="btn btn-ghost" onclick="fetchData()"><i class="fas fa-rotate"></i> Refresh</button>
+                </div>
+                <div class="table-card">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th onclick="sortAssets('name', 'my-assets')" style="cursor:pointer;width:50%;">ASSET <i class="fas fa-sort sort-icon" id="sort-my-assets-name"></i></th>
+                                    <th style="width:25%;">STATUS</th>
+                                    <th style="width:25%;">PHOTO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="my-asset-table-body"></tbody>
+                        </table>
+                    </div>
+                    <div id="my-asset-empty" class="empty-state show">
+                        <div class="empty-icon"><i class="fas fa-box-open"></i></div>
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:4px;">No assets assigned</h3>
+                        <p style="font-size:13px;color:var(--ink-soft);max-width:300px;">You currently don't have any assets assigned to you.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add / Edit Asset (Admin & Sub-Admin) -->
+            <div id="view-add-asset" class="view-layer">
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title" id="form-page-title">Register Asset</h2>
+                        <p class="page-sub" id="form-page-sub">Track new equipment and its assignments</p>
+                    </div>
+                    <button class="btn btn-ghost" onclick="fetchData()"><i class="fas fa-rotate"></i> Refresh</button>
+                </div>
+                <form id="add-asset-form">
+                    <input type="hidden" id="editAssetId" value="">
+                    <div class="form-card">
+                        <div class="form-section-title"><i class="fas fa-desktop"></i> Asset Details</div>
+
+                        <div class="form-grid form-grid-2">
+                            <div>
+                                <label>Asset ID / Tag <span style="color:var(--danger)">*</span></label>
+                                <input type="text" id="customAssetId" class="input" required placeholder="e.g., AST-001">
+                            </div>
+                            <div>
+                                <label>Asset Name / Model <span style="color:var(--danger)">*</span></label>
+                                <input type="text" id="assetName" class="input" required placeholder="e.g., Dell XPS 15">
+                            </div>
+                            <div>
+                                <label>Ownership</label>
+                                <select id="ownership" class="input">
+                                    <option value="Own">Owned</option>
+                                    <option value="Rented">Rented</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Status</label>
+                                <select id="status" class="input">
+                                    <option value="Working">Working</option>
+                                    <option value="Non-Working">Non-Working</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Assigned Person Name</label>
+                                <input type="text" id="assignedName" class="input" placeholder="John Doe" list="user-names-list">
+                                <datalist id="user-names-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Assigned Person Contact</label>
+                                <input type="text" id="assignedContact" class="input" placeholder="+1 234 567 8900">
+                            </div>
+                            <div>
+                                <label>Department</label>
+                                <input type="text" id="assignedDept" class="input" placeholder="IT, HR, Finance...">
+                            </div>
+                            <div>
+                                <label>Cabin / Room Number</label>
+                                <input type="text" id="cabinNumber" class="input" placeholder="e.g., A-102">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-card">
+                        <div class="form-section-title"><i class="fas fa-calendar"></i> Important Dates</div>
+                        <div class="form-grid form-grid-3">
+                            <div><label>Purchase Date <span style="color:var(--danger)">*</span></label><input type="date" id="purchaseDate" class="input" required></div>
+                            <div><label>Warranty End Date</label><input type="date" id="warrantyDate" class="input"></div>
+                            <div><label>Next Service Due <span style="color:var(--danger)">*</span></label><input type="date" id="serviceDate" class="input" required></div>
+                        </div>
+                    </div>
+
+                    <div class="form-card">
+                        <div class="form-section-title"><i class="fas fa-headset"></i> Service Providers</div>
+                        <div id="sp-container">
+                            <!-- JS Will auto fill this block -->
+                        </div>
+                        <button type="button" class="add-sp-btn" onclick="addSpBlock()"><i class="fas fa-plus"></i> Add Another Provider</button>
+                    </div>
+
+                    <div class="form-card">
+                        <div class="form-section-title"><i class="fas fa-paperclip"></i> Documents (Max 6MB)</div>
+                        <div class="form-grid form-grid-2">
+                            <div>
+                                <label>Product Photo (Images only)</label>
+                                <div class="dropzone" id="dz-photo">
+                                    <div class="dz-content" id="dz-photo-init">
+                                        <i class="fas fa-camera dz-icon"></i><br>
+                                        <label for="upload-photo" class="dz-link">Click to upload photo</label>
+                                        <input type="file" id="upload-photo" class="hidden" accept="image/*">
+                                    </div>
+                                    <div class="dz-preview" id="dz-photo-prev">
+                                        <img id="dz-photo-img" class="dz-thumb" src="">
+                                        <div class="dz-file-name" id="dz-photo-name"></div>
+                                        <button type="button" class="dz-remove" onclick="removeFile('photo')"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Bill / Invoice (PDF or Images)</label>
+                                <div class="dropzone" id="dz-bill">
+                                    <div class="dz-content" id="dz-bill-init">
+                                        <i class="fas fa-file-invoice dz-icon"></i><br>
+                                        <label for="upload-bill" class="dz-link">Click to upload bill</label>
+                                        <input type="file" id="upload-bill" class="hidden" accept="image/*,application/pdf">
+                                    </div>
+                                    <div class="dz-preview" id="dz-bill-prev">
+                                        <img id="dz-bill-img" class="dz-thumb" src="" style="display:none">
+                                        <div class="dz-thumb" id="dz-bill-icon" style="display:none;align-items:center;justify-content:center;background:var(--surface-2);color:var(--accent);"><i class="fas fa-file-pdf"></i></div>
+                                        <div class="dz-file-name" id="dz-bill-name"></div>
+                                        <button type="button" class="dz-remove" onclick="removeFile('bill')"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:12px;justify-content:flex-end;">
+                        <button type="button" class="btn btn-ghost" onclick="switchView(currentUser.role === 'Admin' ? 'assets' : 'my-assets')">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="form-submit-btn"><i class="fas fa-save"></i> Save Asset</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Report Issue -->
+            <div id="view-report-issue" class="view-layer">
+                <div class="page-header">
+                    <div><h2 class="page-title">Report an Issue</h2><p class="page-sub">Submit a redressal ticket for a faulty asset</p></div>
+                    <button class="btn btn-ghost" onclick="fetchData()"><i class="fas fa-rotate"></i> Refresh</button>
+                </div>
+                <div class="form-card" style="max-width:600px; margin:0 auto;">
+                    <form id="ticket-form">
+                        <div class="form-grid">
+                            <div><label>Your Department <span style="color:var(--danger)">*</span></label><input type="text" id="tkt-dept" class="input" required placeholder="e.g., HR" oninput="filterAssetsForDropdown()"></div>
+                            <div><label>Cabin / Room Number <span style="color:var(--danger)">*</span></label><input type="text" id="tkt-cabin" class="input" required placeholder="e.g., A-102" oninput="filterAssetsForDropdown()"></div>
+                            <div>
+                                <label>Select Faulty Asset <span style="color:var(--danger)">*</span></label>
+                                <select id="tkt-asset" class="input" required><option value="">-- Enter Dept & Cabin first --</option></select>
+                            </div>
+                            <div>
+                                <label>Describe the Problem <span style="color:var(--danger)">*</span></label>
+                                <textarea id="tkt-issue" class="input" required rows="4" placeholder="Briefly describe what is wrong..."></textarea>
+                            </div>
+                            <div style="grid-column: 1 / -1;">
+                                <label>Issue Proof (Optional - Image only, Max 6MB)</label>
+                                <div class="dropzone" id="dz-issueProof">
+                                    <div class="dz-content" id="dz-issueProof-init">
+                                        <i class="fas fa-camera dz-icon"></i><br>
+                                        <label for="upload-issueProof" class="dz-link">Click to upload proof</label>
+                                        <input type="file" id="upload-issueProof" class="hidden" accept="image/*">
+                                    </div>
+                                    <div class="dz-preview" id="dz-issueProof-prev">
+                                        <img id="dz-issueProof-img" class="dz-thumb" src="">
+                                        <div class="dz-file-name" id="dz-issueProof-name"></div>
+                                        <button type="button" class="dz-remove" onclick="removeFile('issueProof')"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;"><i class="fas fa-paper-plane"></i> Submit Ticket</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Admin Tickets -->
+            <div id="view-admin-tickets" class="view-layer">
+                <div class="page-header">
+                    <div><h2 class="page-title">Ticket Management</h2><p class="page-sub">Resolve user issues & Automated Service Tickets</p></div>
+                    <div style="display:flex;gap:10px;">
+                        <select id="filt-ticket-status" class="input" style="width:auto; padding:8px 12px;" onchange="renderTickets()">
+                            <option value="">All Statuses</option>
+                            <option value="Open">Open</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                        <button class="btn btn-ghost" onclick="fetchData()"><i class="fas fa-rotate"></i> Refresh</button>
+                    </div>
+                </div>
+                <div class="table-card">
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>TICKET ID</th><th>DATE</th><th>REPORTED BY</th><th>LOCATION</th><th>ASSET</th><th>ISSUE / DETAILS</th><th>STATUS</th><th>ACTION</th></tr></thead>
+                            <tbody id="admin-ticket-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Tickets -->
+            <div id="view-user-tickets" class="view-layer">
+                <div class="page-header">
+                    <div><h2 class="page-title">My Tickets</h2><p class="page-sub">Status of your reported issues</p></div>
+                    <button class="btn btn-ghost" onclick="fetchData()"><i class="fas fa-rotate"></i> Refresh</button>
+                </div>
+                <div class="table-card">
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>TICKET ID</th><th>DATE</th><th>LOCATION</th><th>ASSET</th><th>ISSUE</th><th>STATUS</th><th>PROOFS</th></tr></thead>
+                            <tbody id="user-ticket-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Users -->
+            <div id="view-admin-users" class="view-layer">
+                <div class="page-header">
+                    <div><h2 class="page-title">User Management</h2><p class="page-sub">Manage roles and access</p></div>
+                    <button class="btn btn-ghost" onclick="fetchData()"><i class="fas fa-rotate"></i> Refresh</button>
+                </div>
+                <div class="table-card">
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>USER ID</th><th>NAME</th><th>ROLE</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+                            <tbody id="user-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Doc Viewer Modal -->
+<div class="modal-wrap" id="doc-modal">
+    <div class="modal-backdrop" onclick="closeModal('doc-modal')"></div>
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title" id="doc-modal-title">Documents</h3>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <a id="doc-new-tab-btn" href="#" target="_blank" class="btn btn-ghost" style="padding: 6px 12px; font-size: 13px; text-decoration: none;"><i class="fas fa-external-link-alt"></i> Open in New Tab</a>
+                <button class="modal-close" onclick="closeModal('doc-modal')"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div class="modal-body" style="padding:0; overflow:hidden; display:flex; flex-direction:column;">
+            <div id="doc-tabs-header" style="display:flex;gap:4px;padding:12px;background:var(--surface);border-bottom:1px solid var(--border); overflow-x:auto; flex-shrink:0;">
+                <!-- Dynamic Buttons generated here -->
+            </div>
+            <!-- Dynamic container for both Image and PDF iframe -->
+            <div style="flex:1; background:#e5e7eb; position:relative; min-height:400px; display:flex; align-items:center; justify-content:center; overflow:auto;">
+                <img id="doc-img" style="max-width:100%; max-height:100%; display:none; object-fit:contain;" src="">
+                <iframe id="doc-iframe" style="width:100%;height:100%;border:0;position:absolute;inset:0; display:none; transition: opacity 0.3s ease;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resolve Ticket Modal -->
+<div class="modal-wrap" id="resolve-modal">
+    <div class="modal-backdrop" onclick="closeModal('resolve-modal')"></div>
+    <div class="modal-box" style="max-width:500px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Resolve Ticket</h3>
+            <button class="modal-close" onclick="closeModal('resolve-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:14px;color:var(--ink-soft);margin-bottom:12px;">Upload a proof photo (optional - Max 6MB) to mark this ticket as resolved.</p>
+            <input type="hidden" id="resolve-ticket-id">
+            <div class="dropzone" id="dz-proof">
+                <div class="dz-content" id="dz-proof-init">
+                    <i class="fas fa-camera dz-icon"></i><br>
+                    <label for="upload-proof" class="dz-link">Click to upload resolution proof</label>
+                    <input type="file" id="upload-proof" class="hidden" accept="image/*">
+                </div>
+                <div class="dz-preview" id="dz-proof-prev">
+                    <img id="dz-proof-img" class="dz-thumb" src="">
+                    <div class="dz-file-name" id="dz-proof-name"></div>
+                    <button type="button" class="dz-remove" onclick="removeFile('proof')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            
+            <!-- EXCLUSIVE ADMIN FIELDS -->
+            <div id="admin-resolve-fields" class="admin-only" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top:16px;">
+                <label>Repair Cost (₹) <span style="font-size:11px;color:#9ca3af;font-weight:normal">(Admin Only)</span></label>
+                <input type="number" id="resolve-cost" class="input" placeholder="e.g. 1500" style="margin-bottom:12px;">
+                
+                <label>Repair Bill (PDF/Image - Max 6MB) <span style="font-size:11px;color:#9ca3af;font-weight:normal">(Admin Only)</span></label>
+                <div class="dropzone" id="dz-repairBill" style="min-height:90px;">
+                    <div class="dz-content" id="dz-repairBill-init">
+                        <i class="fas fa-file-invoice dz-icon" style="font-size:20px;"></i><br>
+                        <label for="upload-repairBill" class="dz-link">Click to upload repair bill</label>
+                        <input type="file" id="upload-repairBill" class="hidden" accept="image/*,application/pdf">
+                    </div>
+                    <div class="dz-preview" id="dz-repairBill-prev">
+                        <img id="dz-repairBill-img" class="dz-thumb" src="" style="display:none">
+                        <div class="dz-thumb" id="dz-repairBill-icon" style="display:none;align-items:center;justify-content:center;background:var(--surface-2);color:var(--accent);"><i class="fas fa-file-pdf"></i></div>
+                        <div class="dz-file-name" id="dz-repairBill-name"></div>
+                        <button type="button" class="dz-remove" onclick="removeFile('repairBill')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:16px;">
+                <button class="btn btn-ghost" onclick="closeModal('resolve-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="submitResolution()"><i class="fas fa-check"></i> Mark Resolved</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Service Auto-Ticket Modal -->
+<div class="modal-wrap" id="service-modal">
+    <div class="modal-backdrop" onclick="closeModal('service-modal')"></div>
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Update Service Date</h3>
+            <button class="modal-close" onclick="closeModal('service-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:14px;color:var(--ink-soft);margin-bottom:12px;">This will resolve the automated system ticket and update the asset's next service date.</p>
+            <input type="hidden" id="service-asset-id">
+            <label>New Next Service Date</label>
+            <input type="date" id="new-service-date" class="input">
+            <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
+                <button class="btn btn-ghost" onclick="closeModal('service-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitNewService()"><i class="fas fa-save"></i> Save & Resolve</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // DEPLOYMENT: REPLACE THIS URL WITH YOUR NEW APPS SCRIPT WEB APP URL
+    // ==========================================
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4TDMh1zaqwxJCrewqfcJSU4orAwR7mvMWXe1kvMpUSAG4wUPfHEX2wOAsWqWy7TqMYQ/exec'; 
+
+    let currentUser = null; 
+    let appData = { assets: [], tickets: [], users: [] };
+    let filesData = { photo: '', bill: '', proof: '', issueProof: '', repairBill: '' };
+    let sortConfig = { table: null, key: null, dir: 'asc' };
+    let currentQuickFilter = null;
+    let currentModalAssetUrls = {};
+
+    let progressTimer;
+    let currentPct = 0;
+
+    function startProgress(msg) {
+        document.getElementById('loader-text').innerText = msg;
+        document.getElementById('loader-percentage').innerText = '0%';
+        document.getElementById('loader-progress-bar').style.width = '0%';
+        document.getElementById('progress-wrap').classList.remove('hidden');
+        
+        const l = document.getElementById('global-loader');
+        l.classList.remove('hidden'); 
+        setTimeout(() => l.style.opacity = '1', 10);
+
+        currentPct = 0;
+        clearInterval(progressTimer);
+        // Slowly increment up to 85% to simulate network wait time
+        progressTimer = setInterval(() => {
+            if(currentPct < 85) {
+                const increment = Math.random() * (85 - currentPct) * 0.05 + 0.5;
+                currentPct += increment;
+                updateProgressUI(currentPct);
+            }
+        }, 150);
+    }
+
+    function updateProgress(pct, msg) {
+        if(msg) document.getElementById('loader-text').innerText = msg;
+        currentPct = pct;
+        updateProgressUI(currentPct);
+    }
+
+    function finishProgress() {
+        clearInterval(progressTimer);
+        currentPct = 100;
+        updateProgressUI(100);
+        document.getElementById('loader-text').innerText = 'Ready!';
+    }
+
+    function updateProgressUI(pct) {
+        const p = Math.min(100, Math.round(pct));
+        document.getElementById('loader-percentage').innerText = `${p}%`;
+        document.getElementById('loader-progress-bar').style.width = `${p}%`;
+    }
+
+    function showLoading(msg = 'Loading...') { 
+        document.getElementById('loader-text').innerText = msg; 
+        document.getElementById('progress-wrap').classList.add('hidden'); // Hide bar for normal brief loads
+        const l = document.getElementById('global-loader');
+        l.classList.remove('hidden'); 
+        setTimeout(() => l.style.opacity = '1', 10);
+    }
+    
+    function hideLoading() { 
+        const l = document.getElementById('global-loader');
+        l.style.opacity = '0';
+        setTimeout(() => l.classList.add('hidden'), 300);
+    }
+
+    function showToast(msg, type = 'success') {
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-circle-exclamation'}"></i> ${msg}`;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.opacity=0; t.style.transform='translateY(10px) scale(0.9)'; t.style.transition='0.3s cubic-bezier(0.4, 0, 0.2, 1)'; setTimeout(()=>t.remove(),300); }, 3000);
+    }
+
+    function toggleAuth(view) {
+        document.getElementById('login-card').classList.toggle('hidden', view !== 'login');
+        document.getElementById('register-card').classList.toggle('hidden', view !== 'register');
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+        const err = document.getElementById('login-error'); err.style.display = 'none';
+        
+        startProgress('Authenticating user...');
+        
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'login', userId: document.getElementById('login-userId').value, password: document.getElementById('login-password').value }) });
+            const data = await res.json();
+            
+            if (data.success) { 
+                currentUser = data.user; 
+                updateProgress(35, 'Connecting to database...');
+                await initializeAppData(); 
+            } else { 
+                err.style.display = 'block'; 
+                document.getElementById('login-error-text').innerText = data.message; 
+                hideLoading();
+            }
+        } catch(e) { 
+            err.style.display='block'; document.getElementById('login-error-text').innerText = 'Network error'; 
+            hideLoading();
+        }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault(); showLoading('Registering...');
+        const err = document.getElementById('reg-error'); err.style.display = 'none';
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'register', name: document.getElementById('reg-name').value, userId: document.getElementById('reg-userId').value, password: document.getElementById('reg-password').value }) });
+            const data = await res.json();
+            if (data.success) { showToast('Registration successful! Please login.'); toggleAuth('login'); document.getElementById('register-form').reset(); }
+            else { err.style.display = 'block'; document.getElementById('reg-error-text').innerText = data.message; }
+        } catch(e) { err.style.display='block'; document.getElementById('reg-error-text').innerText = 'Network error'; }
+        hideLoading();
+    });
+
+    function logout() {
+        currentUser = null; appData = { assets: [], tickets: [], users: [] };
+        document.getElementById('login-form').reset();
+        document.getElementById('app-view').classList.add('hidden');
+        document.getElementById('auth-view').classList.remove('hidden');
+    }
+
+    async function initializeAppData() {
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=getAppData&role=${currentUser.role}&userId=${encodeURIComponent(currentUser.userId)}&userName=${encodeURIComponent(currentUser.name)}`);
+            updateProgress(75, 'Processing assets and tickets...');
+            const result = await res.json();
+            
+            if (result.success) {
+                appData = {
+                    assets: result.assets || [],
+                    tickets: result.tickets || [],
+                    users: result.users || []
+                };
+                
+                // Populate user suggestions for Add Asset form
+                const dl = document.getElementById('user-names-list');
+                if (dl) {
+                    dl.innerHTML = '';
+                    appData.users.forEach(u => dl.innerHTML += `<option value="${u.name}">`);
+                }
+                
+                updateProgress(95, 'Preparing dashboard...');
+                finishProgress();
+                
+                // Allow user to see 100% briefly before switching view
+                setTimeout(() => {
+                    setupEnvironment();
+                }, 400); 
+
+            } else {
+                showToast('Failed to sync data', 'error');
+                hideLoading();
+            }
+        } catch(e) { 
+            showToast('Connection Error', 'error'); console.error(e); 
+            hideLoading();
+        }
+    }
+
+    function setupEnvironment() {
+        document.getElementById('auth-view').classList.add('hidden');
+        document.getElementById('app-view').classList.remove('hidden');
+        
+        document.getElementById('sidebar-name').innerText = currentUser.name;
+        document.getElementById('sidebar-role').innerText = currentUser.role;
+        document.getElementById('sidebar-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
+
+        const isAdmin = currentUser.role === 'Admin';
+        const isSubAdmin = currentUser.role === 'Sub-Admin';
+        
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'block' : 'none');
+        document.querySelectorAll('.sub-admin-only').forEach(el => el.style.display = isSubAdmin ? 'block' : 'none');
+        document.querySelectorAll('.non-admin').forEach(el => el.style.display = !isAdmin ? 'block' : 'none');
+
+        const mobMenu = document.getElementById('mobile-menu');
+        mobMenu.innerHTML = '';
+        if(isAdmin) {
+            mobMenu.innerHTML += `<button class="mobile-nav-btn" onclick="switchView('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</button>
+                                  <button class="mobile-nav-btn" onclick="switchView('assets')"><i class="fas fa-list-ul"></i> All Assets</button>
+                                  <button class="mobile-nav-btn" onclick="openAddAssetForm()"><i class="fas fa-plus"></i> Add Asset</button>
+                                  <button class="mobile-nav-btn" onclick="switchView('admin-tickets')"><i class="fas fa-ticket-alt"></i> All Tickets</button>
+                                  <button class="mobile-nav-btn" onclick="switchView('admin-users')"><i class="fas fa-users"></i> Users</button>`;
+        } else if (isSubAdmin) {
+            mobMenu.innerHTML += `<button class="mobile-nav-btn" onclick="openAddAssetForm()"><i class="fas fa-plus"></i> Add Asset</button>
+                                  <button class="mobile-nav-btn" onclick="switchView('my-assets')"><i class="fas fa-laptop"></i> My Assets</button>
+                                  <button class="mobile-nav-btn" onclick="switchView('report-issue')"><i class="fas fa-triangle-exclamation"></i> Report Issue</button>
+                                  <button class="mobile-nav-btn" onclick="switchView('user-tickets')"><i class="fas fa-list-check"></i> My Tickets</button>`;
+        } else {
+            mobMenu.innerHTML += `<button class="mobile-nav-btn" onclick="switchView('my-assets')"><i class="fas fa-laptop"></i> My Assets</button>
+                                  <button class="mobile-nav-btn" onclick="switchView('report-issue')"><i class="fas fa-triangle-exclamation"></i> Report Issue</button>
+                                  <button class="mobile-nav-btn" onclick="switchView('user-tickets')"><i class="fas fa-list-check"></i> My Tickets</button>`;
+        }
+        mobMenu.innerHTML += `<button class="mobile-nav-btn" onclick="logout()" style="color:var(--danger)"><i class="fas fa-sign-out-alt" style="color:var(--danger)"></i> Sign Out</button>`;
+
+        if(currentUser.role === 'Admin') updateDashboard();
+        switchView(isAdmin ? 'dashboard' : 'my-assets');
+        
+        hideLoading(); // Finally dismiss the loader overlay
+    }
+
+    function switchView(viewId) {
+        document.querySelectorAll('.view-layer').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        
+        const layer = document.getElementById('view-' + viewId);
+        if(layer) layer.classList.add('active');
+        
+        document.querySelectorAll(`[data-view="${viewId}"]`).forEach(el => el.classList.add('active'));
+        
+        document.getElementById('mobile-menu').classList.remove('show');
+        document.getElementById('content-scroll').scrollTo(0,0);
+
+        if(viewId === 'assets') renderAssets();
+        if(viewId === 'my-assets') renderMyAssets();
+        if(viewId === 'admin-tickets' || viewId === 'user-tickets') renderTickets();
+        if(viewId === 'admin-users') renderUsers();
+        if(viewId === 'report-issue') filterAssetsForDropdown();
+    }
+
+    async function fetchData() {
+        showLoading('Syncing data...');
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=getAppData&role=${currentUser.role}&userId=${encodeURIComponent(currentUser.userId)}&userName=${encodeURIComponent(currentUser.name)}`);
+            const result = await res.json();
+            if (result.success) {
+                appData = {
+                    assets: result.assets || [],
+                    tickets: result.tickets || [],
+                    users: result.users || []
+                };
+                
+                // Populate user suggestions for Add Asset form
+                const dl = document.getElementById('user-names-list');
+                if (dl) {
+                    dl.innerHTML = '';
+                    appData.users.forEach(u => dl.innerHTML += `<option value="${u.name}">`);
+                }
+
+                if(currentUser.role === 'Admin') updateDashboard();
+                if (document.getElementById('view-assets').classList.contains('active')) renderAssets();
+                if (document.getElementById('view-my-assets').classList.contains('active')) renderMyAssets();
+                if (document.getElementById('view-admin-tickets').classList.contains('active') || document.getElementById('view-user-tickets').classList.contains('active')) renderTickets();
+                if (document.getElementById('view-admin-users').classList.contains('active')) renderUsers();
+                if (document.getElementById('view-report-issue').classList.contains('active')) filterAssetsForDropdown();
+            } else showToast('Failed to sync data', 'error');
+        } catch(e) { showToast('Connection Error', 'error'); console.error(e); } finally { hideLoading(); }
+    }
+
+    function updateDashboard() {
+        document.getElementById('stat-total').innerText = appData.assets.length;
+        let svc=0, war=0, open=0;
+        
+        appData.assets.forEach(a => {
+            const dS = a.serviceDate && !isNaN(new Date(a.serviceDate)) ? Math.ceil((new Date(a.serviceDate) - new Date()) / 86400000) : null;
+            const dW = a.warrantyDate && !isNaN(new Date(a.warrantyDate)) ? Math.ceil((new Date(a.warrantyDate) - new Date()) / 86400000) : null;
+            if (dS !== null && dS >= 0 && dS <= 30) svc++;
+            if (dW !== null && dW >= 0 && dW <= 30) war++;
+        });
+        
+        // Count user tickets as open, and dynamic auto-tickets
+        appData.tickets.forEach(t => { if(t.status === 'Open') open++; });
+        appData.assets.forEach(a => {
+            if (a.serviceDate && !isNaN(new Date(a.serviceDate))) {
+                if (Math.ceil((new Date(a.serviceDate) - new Date()) / 86400000) <= 5) open++;
+            }
+        });
+
+        document.getElementById('stat-service').innerText = svc;
+        document.getElementById('stat-warranty').innerText = war;
+        document.getElementById('stat-tickets').innerText = open;
+    }
+
+    function sortAssets(key, targetTable) {
+        if(sortConfig.table === targetTable && sortConfig.key === key) { 
+            sortConfig.dir = sortConfig.dir === 'asc' ? 'desc' : 'asc'; 
+        } else { 
+            sortConfig.table = targetTable; sortConfig.key = key; sortConfig.dir = 'asc'; 
+        }
+        
+        document.querySelectorAll('.sort-icon').forEach(el => el.className = 'fas fa-sort sort-icon');
+        const icon = document.getElementById(`sort-${targetTable}-${key}`);
+        if(icon) icon.className = `fas fa-sort-${sortConfig.dir==='asc'?'up':'down'} sort-icon active`;
+        
+        if(targetTable === 'assets') renderAssets();
+        else if (targetTable === 'my-assets') renderMyAssets();
+    }
+
+    function filterTickets(status) {
+        const select = document.getElementById('filt-ticket-status');
+        if (select) select.value = status;
+        switchView('admin-tickets');
+    }
+
+    function clearAssetFilters() {
+        currentQuickFilter = null;
+        document.getElementById('filt-asset-id').value = '';
+        document.getElementById('filt-asset').value = '';
+        document.getElementById('filt-assign').value = '';
+        document.getElementById('filt-war').value = '';
+        document.getElementById('filt-svc').value = '';
+        document.getElementById('filt-sp').value = '';
+        document.getElementById('filt-status').value = '';
+        document.getElementById('filt-ownership').value = '';
+        document.getElementById('list-subtitle').innerText = 'Showing all active assets';
+        document.getElementById('clear-filter-btn').classList.add('hidden');
+        renderAssets();
+    }
+
+    function filterAssets(quickFilter) {
+        clearAssetFilters();
+        currentQuickFilter = quickFilter;
+        if(quickFilter === 'service') { document.getElementById('list-subtitle').innerText = 'Filtered: Service due within 30 days'; }
+        if(quickFilter === 'warranty') { document.getElementById('list-subtitle').innerText = 'Filtered: Warranty ending within 30 days'; }
+        
+        // Let renderAssets decide visibility based on currentQuickFilter
+        switchView('assets');
+    }
+
+    function renderAssets() {
+        let data = (appData.assets || []).filter(a => typeof a === 'object' && a !== null);
+        
+        const fId = document.getElementById('filt-asset-id') ? document.getElementById('filt-asset-id').value.toLowerCase() : '';
+        const fAst = document.getElementById('filt-asset') ? document.getElementById('filt-asset').value.toLowerCase() : '';
+        const fAsg = document.getElementById('filt-assign') ? document.getElementById('filt-assign').value.toLowerCase() : '';
+        const fSp  = document.getElementById('filt-sp') ? document.getElementById('filt-sp').value.toLowerCase() : '';
+        const fWar = document.getElementById('filt-war') ? document.getElementById('filt-war').value : '';
+        const fSvc = document.getElementById('filt-svc') ? document.getElementById('filt-svc').value : '';
+        const fStatus = document.getElementById('filt-status') ? document.getElementById('filt-status').value : '';
+        const fOwnership = document.getElementById('filt-ownership') ? document.getElementById('filt-ownership').value : '';
+        
+        if(fId || fAst || fAsg || fSp || fWar || fSvc || fStatus || fOwnership || currentQuickFilter) {
+            document.getElementById('clear-filter-btn').classList.remove('hidden');
+        } else {
+            document.getElementById('clear-filter-btn').classList.add('hidden');
+        }
+        
+        data = data.filter(a => {
+            const idStr = String(a.AssetID || a.id || '').toLowerCase();
+            const nameStr = String(a.name || '').toLowerCase();
+            const assetNum = appData.assets.findIndex(x => x.id === a.id) + 1;
+            const comboAstStr = nameStr + " #" + assetNum;
+            const assignStr = String((a.assignedName || '') + ' ' + (a.assignedDept || '') + ' ' + (a.cabinNumber || '')).toLowerCase();
+            const spStr = String(a.spName || '').toLowerCase();
+
+            if(fId && !idStr.includes(fId)) return false;
+            if(fAst && !comboAstStr.includes(fAst)) return false;
+            if(fAsg && !assignStr.includes(fAsg)) return false;
+            if(fSp && !spStr.includes(fSp)) return false;
+            if(fWar && a.warrantyDate !== fWar) return false;
+            if(fSvc && a.serviceDate !== fSvc) return false;
+            
+            if(fStatus && String(a.status).toLowerCase() !== fStatus) return false;
+            if(fOwnership) {
+                const o = String(a.ownership || 'Own').toLowerCase();
+                if (fOwnership === 'own' && o !== 'own' && o !== 'owned') return false;
+                if (fOwnership === 'rented' && o !== 'rented') return false;
+            }
+            
+            if (currentQuickFilter === 'service') {
+                if (!a.serviceDate || isNaN(new Date(a.serviceDate))) return false;
+                const days = Math.ceil((new Date(a.serviceDate) - new Date()) / 86400000);
+                if (days > 30) return false;
+            }
+            if (currentQuickFilter === 'warranty') {
+                if (!a.warrantyDate || isNaN(new Date(a.warrantyDate))) return false;
+                const days = Math.ceil((new Date(a.warrantyDate) - new Date()) / 86400000);
+                if (days > 30) return false;
+            }
+            
+            return true;
+        });
+
+        if(sortConfig.table === 'assets' && sortConfig.key) {
+            data.sort((a,b) => {
+                let vA = a[sortConfig.key] || ''; let vB = b[sortConfig.key] || '';
+                if(sortConfig.key.includes('Date')) { vA = vA && !isNaN(new Date(vA)) ? new Date(vA).getTime() : 0; vB = vB && !isNaN(new Date(vB)) ? new Date(vB).getTime() : 0; }
+                else { vA = vA.toString().toLowerCase(); vB = vB.toString().toLowerCase(); }
+                if(vA < vB) return sortConfig.dir === 'asc' ? -1 : 1;
+                if(vA > vB) return sortConfig.dir === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // Update the count display after filtering
+        const countBadge = document.getElementById('asset-count-badge');
+        if (countBadge) countBadge.innerText = 'Count: ' + data.length;
+
+        const tbody = document.getElementById('asset-table-body'); if(!tbody) return;
+        tbody.innerHTML = '';
+        const emptyState = document.getElementById('asset-empty');
+        
+        if(data.length === 0) { emptyState.classList.add('show'); return; } 
+        else { emptyState.classList.remove('show'); }
+
+        const formatD = d => d && !isNaN(new Date(d)) ? new Date(d).toLocaleDateString() : '—';
+
+        data.forEach(a => {
+            const tr = document.createElement('tr');
+            
+            let daysWar = null;
+            if(a.warrantyDate && !isNaN(new Date(a.warrantyDate))) daysWar = Math.ceil((new Date(a.warrantyDate) - new Date()) / 86400000);
+            const wCls = daysWar === null ? 'badge-neutral' : (daysWar < 0 ? 'badge-danger' : (daysWar <= 30 ? 'badge-warning' : 'badge-valid'));
+            const wTxt = daysWar === null ? 'N/A' : (daysWar < 0 ? 'Overdue' : (daysWar <= 30 ? `Due ${daysWar}d` : 'Valid'));
+            
+            let daysSvc = null;
+            if(a.serviceDate && !isNaN(new Date(a.serviceDate))) daysSvc = Math.ceil((new Date(a.serviceDate) - new Date()) / 86400000);
+            const sCls = daysSvc === null ? 'badge-neutral' : (daysSvc < 0 ? 'badge-danger' : (daysSvc <= 30 ? 'badge-warning' : 'badge-valid'));
+            const sTxt = daysSvc === null ? 'N/A' : (daysSvc < 0 ? 'Overdue' : (daysSvc <= 30 ? `Due ${daysSvc}d` : 'Valid'));
+
+            const spList = String(a.spName || '').split(' | '); 
+            const spCon = String(a.spContact || '').split(' | '); 
+            const spAdd = String(a.spAddress || '').split(' | ');
+            let spHTML = '';
+            for(let i=0; i<spList.length; i++) {
+                if(!spList[i]) continue;
+                spHTML += `<div style="margin-bottom:${i < spList.length-1 ? '8px' : '0'}; padding-bottom:${i < spList.length-1 ? '8px' : '0'}; border-bottom:${i < spList.length-1 ? '1px solid var(--border)' : 'none'};">
+                            <div style="font-weight:600;font-size:13px;">${spList[i]}</div>
+                            <div style="color:var(--ink-soft);font-size:12px;"><i class="fas fa-phone" style="font-size:10px;margin-right:4px"></i>${spCon[i] || '—'}</div>
+                            <div style="color:var(--ink-soft);font-size:12px;margin-top:2px;"><i class="fas fa-map-marker-alt" style="font-size:10px;margin-right:4px"></i>${spAdd[i] || '—'}</div>
+                        </div>`;
+            }
+
+            const safeA = (a.photoData && a.photoData.length > 5 && !a.photoData.startsWith('ERROR')) ? a.photoData : '';
+            const safeB = (a.billData && a.billData.length > 5 && !a.billData.startsWith('ERROR')) ? a.billData : '';
+            const docBtn = safeA || safeB 
+                ? `<button class="btn btn-ghost" style="padding:6px 10px;font-size:12px" title="View Docs" onclick="viewAssetDocs('${a.id}')"><i class="fas fa-folder-open"></i></button>`
+                : `<span style="font-size:12px;color:#9ca3af;padding:6px 10px;">No docs</span>`;
+
+            const assetNum = appData.assets.findIndex(x => x.id === a.id) + 1;
+
+            tr.innerHTML = `
+                <td>
+                    <div style="font-family:monospace;font-size:13px;font-weight:600;color:var(--ink);">${a.AssetID || a.id}</div>
+                </td>
+                <td>
+                    <div style="font-weight:600">${a.name||'—'}</div>
+                    <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">Serial Number: <span style="font-family:monospace;font-weight:600">#${assetNum}</span></div>
+                    <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">Purchased: ${formatD(a.purchaseDate)}</div>
+                </td>
+                <td>
+                    <div style="font-weight:500;font-size:13px"><i class="fas fa-user" style="color:#9ca3af;font-size:10px;margin-right:4px"></i>${a.assignedName || 'Unassigned'}</div>
+                    <div style="font-size:12px;color:var(--ink-soft)"><i class="fas fa-building" style="color:#9ca3af;font-size:10px;margin-right:4px"></i>${a.assignedDept||'—'} | Cabin: ${a.cabinNumber||'—'}</div>
+                    <div style="font-size:12px;color:var(--ink-soft)"><i class="fas fa-phone" style="color:#9ca3af;font-size:10px;margin-right:4px"></i>${a.assignedContact||'—'}</div>
+                </td>
+                <td><span class="badge ${wCls}">${wTxt}</span><div style="font-size:11px;margin-top:4px;color:#6b7280">${formatD(a.warrantyDate)}</div></td>
+                <td><span class="badge ${sCls}">${sTxt}</span><div style="font-size:11px;margin-top:4px;color:#6b7280">${formatD(a.serviceDate)}</div></td>
+                <td>${spHTML || '<span style="color:#9ca3af;font-size:12px">No Provider</span>'}</td>
+                <td>
+                    <select class="input" style="padding:4px 8px;width:auto; ${a.status==='Non-Working'?'color:var(--danger);font-weight:bold;':''}" onchange="updateAsset('${a.id}', 'status', this.value)">
+                        <option value="Working" ${a.status!=='Non-Working'?'selected':''}>Working</option>
+                        <option value="Non-Working" ${a.status==='Non-Working'?'selected':''}>Non-Working</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="input" style="padding:4px 8px;width:auto;" onchange="updateAsset('${a.id}', 'ownership', this.value)">
+                        <option value="Own" ${a.ownership!=='Rented'?'selected':''}>Owned</option>
+                        <option value="Rented" ${a.ownership==='Rented'?'selected':''}>Rented</option>
+                    </select>
+                </td>
+                <td>
+                    <div style="display:flex;gap:4px;">
+                        ${docBtn}
+                        <button class="btn btn-ghost" style="padding:6px 10px;font-size:12px" title="Edit Asset" onclick="loadEditForm('${a.id}')"><i class="fas fa-edit"></i></button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Explicit Render logic for Sub-Admin / User Assets table (Stripped Down)
+    function renderMyAssets() {
+        let data = (appData.assets || []).filter(a => typeof a === 'object' && a !== null);
+        
+        if(sortConfig.table === 'my-assets' && sortConfig.key) {
+            data.sort((a,b) => {
+                let vA = a[sortConfig.key] || ''; let vB = b[sortConfig.key] || '';
+                if(sortConfig.key.includes('Date')) { vA = vA && !isNaN(new Date(vA)) ? new Date(vA).getTime() : 0; vB = vB && !isNaN(new Date(vB)) ? new Date(vB).getTime() : 0; }
+                else { vA = vA.toString().toLowerCase(); vB = vB.toString().toLowerCase(); }
+                if(vA < vB) return sortConfig.dir === 'asc' ? -1 : 1;
+                if(vA > vB) return sortConfig.dir === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        const tbody = document.getElementById('my-asset-table-body'); if(!tbody) return;
+        tbody.innerHTML = '';
+        const emptyState = document.getElementById('my-asset-empty');
+        
+        if(data.length === 0) { emptyState.classList.add('show'); return; } 
+        else { emptyState.classList.remove('show'); }
+
+        data.forEach(a => {
+            const tr = document.createElement('tr');
+            const safeA = (a.photoData && a.photoData.length > 5 && !a.photoData.startsWith('ERROR')) ? a.photoData : '';
+            
+            const photoBtn = safeA 
+                ? `<button class="btn btn-ghost" style="padding:6px 10px;font-size:12px" onclick="viewMyAssetPhoto('${a.id}')"><i class="fas fa-image"></i> View Photo</button>`
+                : `<span style="font-size:12px;color:#9ca3af">No Photo Available</span>`;
+
+            const assetNum = appData.assets.findIndex(x => x.id === a.id) + 1;
+
+            tr.innerHTML = `
+                <td>
+                    <div style="font-weight:600;font-size:15px;">${a.name||'—'}</div>
+                    <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">Asset ID: <span style="font-family:monospace;font-weight:600">${a.AssetID || a.id}</span></div>
+                </td>
+                <td><span class="badge ${a.status==='Non-Working'?'badge-danger':'badge-valid'}" style="font-size:12px;padding:6px 10px;">${a.status || 'Working'}</span></td>
+                <td>${photoBtn}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function updateAsset(assetId, field, value) {
+        showLoading('Updating asset...');
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateAsset', id: assetId, field: field, value: value }) });
+            const data = await res.json();
+            if(data.success) showToast('Asset updated');
+            else showToast('Update failed','error');
+            fetchData();
+        } catch(e) { showToast('Network Error','error'); hideLoading(); }
+    }
+
+    function openAddAssetForm() {
+        document.getElementById('add-asset-form').reset();
+        document.getElementById('editAssetId').value = '';
+        document.getElementById('form-page-title').innerText = 'Register Asset';
+        document.getElementById('form-page-sub').innerText = 'Track new equipment and its assignments';
+        document.getElementById('form-submit-btn').innerHTML = '<i class="fas fa-save"></i> Save Asset';
+        
+        document.getElementById('sp-container').innerHTML = `
+            <div class="sp-block">
+                <div class="form-grid form-grid-2">
+                    <div><label>Provider Name</label><input type="text" class="input sp-name" placeholder="ABC Electronics"></div>
+                    <div><label>Contact Number</label><input type="text" class="input sp-contact" placeholder="1800-123-456"></div>
+                    <div style="grid-column: 1 / -1;"><label>Address</label><input type="text" class="input sp-address" placeholder="123 Tech Lane, City"></div>
+                </div>
+            </div>`;
+        
+        removeFile('photo'); removeFile('bill');
+        switchView('add-asset');
+    }
+
+    function loadEditForm(assetId) {
+        const a = appData.assets.find(x => String(x.id) === String(assetId));
+        if(!a) return showToast('Asset not found', 'error');
+
+        document.getElementById('editAssetId').value = a.id;
+        document.getElementById('form-page-title').innerText = 'Edit Asset';
+        document.getElementById('form-page-sub').innerText = `Editing: ${a.name}`;
+        document.getElementById('form-submit-btn').innerHTML = '<i class="fas fa-sync"></i> Update Asset';
+
+        document.getElementById('customAssetId').value = a.AssetID || '';
+        document.getElementById('assetName').value = a.name || '';
+        document.getElementById('ownership').value = a.ownership || 'Own';
+        document.getElementById('status').value = a.status || 'Working';
+        document.getElementById('assignedName').value = a.assignedName || '';
+        document.getElementById('assignedContact').value = a.assignedContact || '';
+        document.getElementById('assignedDept').value = a.assignedDept || '';
+        document.getElementById('cabinNumber').value = a.cabinNumber || '';
+        
+        // Format dates correctly for input[type="date"]
+        const formatForInput = d => {
+            if(!d) return '';
+            const dt = new Date(d);
+            return isNaN(dt) ? '' : dt.toISOString().split('T')[0];
+        };
+        document.getElementById('purchaseDate').value = formatForInput(a.purchaseDate);
+        document.getElementById('warrantyDate').value = formatForInput(a.warrantyDate);
+        document.getElementById('serviceDate').value = formatForInput(a.serviceDate);
+
+        // Reconstruct Service Provider blocks
+        const spContainer = document.getElementById('sp-container');
+        spContainer.innerHTML = '';
+        const spNames = String(a.spName || '').split(' | ');
+        const spContacts = String(a.spContact || '').split(' | ');
+        const spAddresses = String(a.spAddress || '').split(' | ');
+        
+        if (spNames.length === 0 || (spNames.length === 1 && !spNames[0])) {
+            addSpBlock();
+        } else {
+            for(let i=0; i<spNames.length; i++) {
+                if(!spNames[i] && !spContacts[i] && !spAddresses[i]) continue;
+                addSpBlock(spNames[i], spContacts[i], spAddresses[i]);
+            }
+        }
+
+        // Preview Existing Files
+        if(a.photoData && a.photoData.length > 5 && !a.photoData.startsWith('ERROR')) {
+            filesData.photo = a.photoData;
+            document.getElementById('dz-photo-init').style.display = 'none';
+            document.getElementById('dz-photo-prev').classList.add('show');
+            document.getElementById('dz-photo-img').src = a.photoData;
+            document.getElementById('dz-photo-img').style.display = 'block';
+            document.getElementById('dz-photo-name').innerText = 'Existing Photo';
+        } else { removeFile('photo'); }
+
+        if(a.billData && a.billData.length > 5 && !a.billData.startsWith('ERROR')) {
+            filesData.bill = a.billData;
+            document.getElementById('dz-bill-init').style.display = 'none';
+            document.getElementById('dz-bill-prev').classList.add('show');
+            if(a.billData.startsWith('data:image/')) {
+                document.getElementById('dz-bill-img').src = a.billData;
+                document.getElementById('dz-bill-img').style.display = 'block';
+                document.getElementById('dz-bill-icon').style.display = 'none';
+            } else {
+                document.getElementById('dz-bill-img').style.display = 'none';
+                document.getElementById('dz-bill-icon').style.display = 'flex';
+            }
+            document.getElementById('dz-bill-name').innerText = 'Existing Bill';
+        } else { removeFile('bill'); }
+
+        switchView('add-asset');
+    }
+
+    function addSpBlock(name='', contact='', address='') {
+        const container = document.getElementById('sp-container');
+        const block = document.createElement('div');
+        block.className = 'sp-block';
+        block.style.animation = 'fadeIn 0.3s ease';
+        block.innerHTML = `<button type="button" class="remove-sp-btn" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+                           <div class="form-grid form-grid-2">
+                               <div><label>Provider Name</label><input type="text" class="input sp-name" placeholder="Provider" value="${name}"></div>
+                               <div><label>Contact Number</label><input type="text" class="input sp-contact" placeholder="Phone" value="${contact}"></div>
+                               <div style="grid-column: 1 / -1;"><label>Address</label><input type="text" class="input sp-address" placeholder="Address" value="${address}"></div>
+                           </div>`;
+        container.appendChild(block);
+    }
+
+    function getBase64(file) {
+        return new Promise((res, rej) => {
+            const r = new FileReader(); r.readAsDataURL(file);
+            r.onload = () => res(r.result); r.onerror = e => rej(e);
+        });
+    }
+
+    ['photo', 'bill', 'proof', 'issueProof', 'repairBill'].forEach(type => {
+        const input = document.getElementById(`upload-${type}`);
+        if(input) {
+            input.addEventListener('change', async function() {
+                const file = this.files[0]; if(!file) return;
+                if(file.size > 6*1024*1024) return showToast('File too large (Max 6MB)','error');
+                
+                try {
+                    filesData[type] = await getBase64(file);
+                    document.getElementById(`dz-${type}-init`).style.display = 'none';
+                    const prev = document.getElementById(`dz-${type}-prev`);
+                    prev.classList.add('show');
+                    document.getElementById(`dz-${type}-name`).innerText = file.name;
+                    
+                    const img = document.getElementById(`dz-${type}-img`);
+                    if(file.type.startsWith('image/')) {
+                        img.src = filesData[type]; img.style.display = 'block';
+                        if(document.getElementById(`dz-${type}-icon`)) document.getElementById(`dz-${type}-icon`).style.display='none';
+                    } else if (document.getElementById(`dz-${type}-icon`)) {
+                        img.style.display = 'none'; document.getElementById(`dz-${type}-icon`).style.display='flex';
+                    }
+                } catch(e) { showToast('Error reading file','error'); }
+            });
+        }
+    });
+
+    function removeFile(type) {
+        document.getElementById(`upload-${type}`).value = '';
+        filesData[type] = '';
+        document.getElementById(`dz-${type}-prev`).classList.remove('show');
+        document.getElementById(`dz-${type}-init`).style.display = 'block';
+    }
+
+    document.getElementById('add-asset-form').addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+        
+        let finalAssignedName = document.getElementById('assignedName').value.trim();
+        if (finalAssignedName && appData.users.length > 0) {
+            const typedFirst = finalAssignedName.toLowerCase().split(/\s+/)[0];
+            const match = appData.users.find(u => u.name.toLowerCase().split(/\s+/)[0] === typedFirst);
+            if (match) finalAssignedName = match.name;
+        }
+
+        let names=[], contacts=[], addresses=[];
+        document.querySelectorAll('.sp-block').forEach(b => {
+            const n = b.querySelector('.sp-name').value.trim();
+            const c = b.querySelector('.sp-contact').value.trim();
+            const a = b.querySelector('.sp-address').value.trim();
+            if(n||c||a) { names.push(n); contacts.push(c); addresses.push(a); }
+        });
+
+        const editId = document.getElementById('editAssetId').value;
+        const isEditing = !!editId;
+        showLoading(isEditing ? 'Updating Asset...' : 'Saving Asset...');
+
+        const payload = {
+            action: isEditing ? 'editAsset' : 'addAsset',
+            id: editId,
+            AssetID: document.getElementById('customAssetId').value,
+            name: document.getElementById('assetName').value,
+            ownership: document.getElementById('ownership').value,
+            status: document.getElementById('status').value,
+            assignedName: finalAssignedName,
+            assignedContact: document.getElementById('assignedContact').value,
+            assignedDept: document.getElementById('assignedDept').value,
+            cabinNumber: document.getElementById('cabinNumber').value,
+            purchaseDate: document.getElementById('purchaseDate').value,
+            warrantyDate: document.getElementById('warrantyDate').value,
+            serviceDate: document.getElementById('serviceDate').value,
+            spName: names.join(' | '),
+            spContact: contacts.join(' | '),
+            spAddress: addresses.join(' | '),
+            photoData: filesData.photo,
+            billData: filesData.bill
+        };
+
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            if(data.success) {
+                showToast(isEditing ? 'Asset updated successfully!' : 'Asset saved successfully!');
+                openAddAssetForm(); // resets UI
+                fetchData(); 
+                switchView(currentUser.role === 'Admin' ? 'assets' : 'my-assets');
+            } else showToast('Error saving asset','error');
+        } catch(e) { showToast('Network Error','error'); }
+        hideLoading();
+    });
+
+    function filterAssetsForDropdown() {
+        const d = document.getElementById('tkt-dept').value.toLowerCase();
+        const c = document.getElementById('tkt-cabin').value.toLowerCase();
+        const select = document.getElementById('tkt-asset');
+        
+        select.innerHTML = '<option value="">-- Select Faulty Asset --</option>';
+        if(!d || !c) return;
+
+        let found = 0;
+        appData.assets.forEach(a => {
+            if(String(a.assignedDept||'').toLowerCase() === d && String(a.cabinNumber||'').toLowerCase() === c) {
+                select.innerHTML += `<option value="${a.name}">${a.name}</option>`;
+                found++;
+            }
+        });
+        if(found === 0) select.innerHTML = '<option value="">No assets found for this location</option>';
+    }
+
+    document.getElementById('ticket-form').addEventListener('submit', async(e) => {
+        e.preventDefault(); showLoading('Submitting ticket...');
+        const payload = {
+            action: 'submitTicket',
+            reportedBy: currentUser.userId,
+            department: document.getElementById('tkt-dept').value,
+            cabinNumber: document.getElementById('tkt-cabin').value,
+            assetName: document.getElementById('tkt-asset').value,
+            issue: document.getElementById('tkt-issue').value,
+            issueProofData: filesData.issueProof
+        };
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            if(data.success) { showToast('Ticket submitted!'); e.target.reset(); removeFile('issueProof'); fetchData(); switchView('user-tickets'); } 
+            else showToast('Error submitting','error');
+        } catch(e) { showToast('Network Error','error'); }
+        hideLoading();
+    });
+
+    function viewMyAssetPhoto(id) {
+        const a = appData.assets.find(x => String(x.id) === String(id));
+        if(a && a.photoData) {
+            openDocModal([{name: 'Asset Photo', url: a.photoData, icon: 'fa-image'}]);
+        }
+    }
+
+    function viewTicketDocs(ticketId) {
+        const t = appData.tickets.find(x => String(x.id) === String(ticketId));
+        if(!t) return;
+        let docs = [];
+        if(t.issueProof && t.issueProof.length > 5) docs.push({name: 'Issue Proof', url: t.issueProof, icon: 'fa-camera'});
+        if(t.resolutionProof && t.resolutionProof.length > 5) docs.push({name: 'Resolution', url: t.resolutionProof, icon: 'fa-image'});
+        if(t.repairBill && t.repairBill.length > 5) docs.push({name: 'Repair Bill', url: t.repairBill, icon: 'fa-file-invoice'});
+        openDocModal(docs);
+    }
+    
+    function viewAssetDocs(assetId) {
+        const a = appData.assets.find(x => String(x.id) === String(assetId));
+        if(!a) return;
+        let docs = [];
+        if(a.photoData && a.photoData.length > 5) docs.push({name: 'Photo', url: a.photoData, icon: 'fa-image'});
+        if(a.billData && a.billData.length > 5) docs.push({name: 'Invoice', url: a.billData, icon: 'fa-file-invoice'});
+        openDocModal(docs);
+    }
+
+    function renderTickets() {
+        const aTbody = document.getElementById('admin-ticket-body');
+        const uTbody = document.getElementById('user-ticket-body');
+        const filtStatus = document.getElementById('filt-ticket-status') ? document.getElementById('filt-ticket-status').value : '';
+        if(aTbody) aTbody.innerHTML = '';
+        if(uTbody) uTbody.innerHTML = '';
+
+        // GENERATE AUTO-TICKETS FOR SERVICES DUE
+        const autoTickets = [];
+        appData.assets.forEach(a => {
+            if (a.serviceDate && !isNaN(new Date(a.serviceDate))) {
+                const days = Math.ceil((new Date(a.serviceDate) - new Date()) / 86400000);
+                if (days <= 5) {
+                    autoTickets.push({
+                        isAuto: true,
+                        id: 'SYS-SVC-' + String(a.id).slice(-4),
+                        date: new Date().toISOString().split('T')[0],
+                        reportedBy: 'SYSTEM',
+                        department: a.assignedDept || 'N/A',
+                        cabinNumber: a.cabinNumber || 'N/A',
+                        assetName: a.name,
+                        assetId: a.id, // Keep reference to actual asset
+                        issue: `Scheduled Service ${days < 0 ? 'Overdue by ' + Math.abs(days) + ' days' : 'due in ' + days + ' days'}`,
+                        status: 'Open'
+                    });
+                }
+            }
+        });
+
+        // Combine Auto tickets (top) + Actual tickets (newest first)
+        const allAdminTickets = [...autoTickets, ...[...appData.tickets].reverse()];
+        
+        allAdminTickets.forEach(t => {
+            const tr = document.createElement('tr');
+            
+            let statusBadge = t.status === 'Open' ? `<span class="badge badge-open">Open</span>` : `<span class="badge badge-resolved">Resolved</span>`;
+            if (t.isAuto) statusBadge = `<span class="badge badge-warning">Action Req</span>`;
+
+            if (currentUser.role === 'Admin' && aTbody) {
+                if (filtStatus && t.status !== filtStatus) return; // Apply Ticket Filter
+                
+                let adminDocsBtn = `<span style="font-size:11px;color:#9ca3af">No Docs</span>`;
+                let resolveBtn = '';
+
+                if (t.isAuto) {
+                    adminDocsBtn = `<span class="badge badge-warning" style="font-size:10px; background:var(--gold-soft); color:#92400e;">System Auto-Ticket</span>`;
+                    resolveBtn = `<button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="openServiceModal('${t.assetId}')"><i class="fas fa-tools"></i> Update Service</button>`;
+                } else {
+                    let hasDocs = (t.issueProof && t.issueProof.length > 5) || (t.resolutionProof && t.resolutionProof.length > 5) || (t.repairBill && t.repairBill.length > 5);
+                    if (hasDocs) adminDocsBtn = `<button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="viewTicketDocs('${t.id}')"><i class="fas fa-folder-open"></i> View Docs</button>`;
+                    if (t.status === 'Open') resolveBtn = `<button class="btn btn-success" style="padding:6px 10px;font-size:12px;" onclick="openResolveModal('${t.id}')"><i class="fas fa-check"></i> Resolve</button>`;
+                }
+                    
+                const costDisplay = t.repairCost ? `<div style="font-size:12px;color:var(--danger);font-weight:600;margin-top:4px;"><i class="fas fa-money-bill-wave"></i> Cost: ₹${t.repairCost}</div>` : '';
+
+                tr.innerHTML = `
+                    <td style="font-weight:600;font-size:12px;">${t.id}</td>
+                    <td style="font-size:12px;color:#6b7280">${t.date.split(' ')[0]}</td>
+                    <td><div style="font-weight:500">${t.reportedBy}</div></td>
+                    <td><div style="font-size:13px">${t.department}</div><div style="font-size:11px;color:#6b7280">${t.cabinNumber}</div></td>
+                    <td style="font-weight:500">${t.assetName}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${t.issue}">
+                        ${t.issue}
+                        ${costDisplay}
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;">
+                            ${adminDocsBtn}
+                            ${resolveBtn}
+                        </div>
+                    </td>
+                `;
+                aTbody.appendChild(tr);
+            }
+
+            // Standard tickets for regular Users
+            if (uTbody && !t.isAuto && String(t.reportedBy).trim() === String(currentUser.userId).trim()) {
+                let hasDocs = (t.issueProof && t.issueProof.length > 5) || (t.resolutionProof && t.resolutionProof.length > 5);
+                const userDocsBtn = hasDocs 
+                    ? `<button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="viewTicketDocs('${t.id}')"><i class="fas fa-folder-open"></i> View Docs</button>`
+                    : `<span style="font-size:11px;color:#9ca3af">No Docs</span>`;
+
+                tr.innerHTML = `
+                    <td style="font-weight:600;font-size:12px;">${t.id}</td>
+                    <td style="font-size:12px;color:#6b7280">${t.date.split(' ')[0]}</td>
+                    <td><div style="font-size:13px">${t.department}</div><div style="font-size:11px;color:#6b7280">${t.cabinNumber}</div></td>
+                    <td style="font-weight:500">${t.assetName}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${t.issue}">${t.issue}</td>
+                    <td>${statusBadge}</td>
+                    <td>${userDocsBtn}</td>
+                `;
+                uTbody.appendChild(tr);
+            }
+        });
+    }
+
+    function renderUsers() {
+        const tbody = document.getElementById('user-table-body');
+        if(!tbody) return; tbody.innerHTML = '';
+        appData.users.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:600">${u.userId}</td>
+                <td>${u.name}</td>
+                <td>
+                    <select class="input" style="padding:4px 8px;width:auto" onchange="updateUser('${u.userId}', 'role', this.value)" ${u.userId === currentUser.userId ? 'disabled' : ''}>
+                        <option value="User" ${u.role==='User'?'selected':''}>User</option>
+                        <option value="Sub-Admin" ${u.role==='Sub-Admin'?'selected':''}>Sub-Admin</option>
+                        <option value="Admin" ${u.role==='Admin'?'selected':''}>Admin</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="input" style="padding:4px 8px;width:auto; ${u.status==='Banned'?'color:var(--danger)':''}" onchange="updateUser('${u.userId}', 'status', this.value)" ${u.userId === currentUser.userId ? 'disabled' : ''}>
+                        <option value="Active" ${u.status==='Active'?'selected':''}>Active</option>
+                        <option value="Banned" ${u.status==='Banned'?'selected':''}>Banned</option>
+                    </select>
+                </td>
+                <td>${u.userId === currentUser.userId ? '<span style="font-size:12px;color:#9ca3af">You</span>' : ''}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function updateUser(targetId, type, val) {
+        showLoading('Updating user...');
+        const payload = { action: 'updateUser', targetUserId: targetId };
+        if(type==='role') payload.newRole = val;
+        if(type==='status') payload.newStatus = val;
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            if(data.success) showToast('User updated');
+            else showToast('Update failed','error');
+            fetchData();
+        } catch(e) { showToast('Network Error','error'); }
+        hideLoading();
+    }
+
+    function openDocModal(docs) {
+        const header = document.getElementById('doc-tabs-header');
+        header.innerHTML = '';
+        currentModalAssetUrls = {};
+        
+        let firstDoc = null;
+        docs.forEach((d, index) => {
+            if (d.url && d.url.length > 5 && !d.url.startsWith('ERROR')) {
+                if(!firstDoc) firstDoc = d;
+                currentModalAssetUrls[d.name] = d.url;
+                const btn = document.createElement('button');
+                btn.className = !firstDoc || firstDoc.name === d.name ? 'btn btn-primary' : 'btn btn-ghost';
+                btn.innerHTML = `<i class="${d.icon || 'fas fa-file'}"></i> <span style="white-space:nowrap">${d.name}</span>`;
+                btn.onclick = () => showIframe(d.name, header);
+                header.appendChild(btn);
+            }
+        });
+        
+        if(firstDoc) {
+            document.getElementById('doc-modal').classList.add('show');
+            // Trigger the display logic on the first doc
+            showIframe(firstDoc.name, header);
+        } else {
+            showToast('No valid documents to display', 'error');
+        }
+    }
+
+    function showIframe(name, header) {
+        // Update active tab styles
+        Array.from(header.children).forEach(b => {
+            b.className = b.innerText.trim() === name.trim() ? 'btn btn-primary' : 'btn btn-ghost';
+        });
+        
+        const url = currentModalAssetUrls[name];
+        document.getElementById('doc-new-tab-btn').href = url;
+        
+        const iframe = document.getElementById('doc-iframe');
+        const img = document.getElementById('doc-img');
+        
+        if (url.startsWith('data:image/')) {
+            iframe.style.display = 'none';
+            iframe.src = ''; 
+            img.src = url;
+            img.style.display = 'block';
+        } else {
+            img.style.display = 'none';
+            img.src = '';
+            iframe.style.display = 'block';
+            iframe.style.opacity = 1;
+            iframe.src = url;
+        }
+    }
+
+    function closeModal(id) { 
+        document.getElementById(id).classList.remove('show'); 
+        if(id === 'doc-modal') {
+             document.getElementById('doc-iframe').src = '';
+             document.getElementById('doc-img').src = '';
+        }
+    }
+
+    // Standard Issue Resolve
+    function openResolveModal(ticketId) {
+        document.getElementById('resolve-ticket-id').value = ticketId;
+        removeFile('proof');
+        removeFile('repairBill');
+        document.getElementById('resolve-cost').value = '';
+        document.getElementById('resolve-modal').classList.add('show');
+    }
+
+    async function submitResolution() {
+        showLoading('Resolving ticket...');
+        const payload = {
+            action: 'resolveTicket',
+            ticketId: document.getElementById('resolve-ticket-id').value,
+            proofData: filesData.proof,
+            repairCost: document.getElementById('resolve-cost').value,
+            repairBillData: filesData.repairBill
+        };
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            if(data.success) { showToast('Ticket resolved!'); closeModal('resolve-modal'); fetchData(); }
+            else showToast('Error resolving', 'error');
+        } catch(e) { showToast('Network error','error'); }
+        hideLoading();
+    }
+
+    // New System Service Resolve
+    function openServiceModal(assetId) {
+        document.getElementById('service-asset-id').value = assetId;
+        document.getElementById('new-service-date').value = '';
+        document.getElementById('service-modal').classList.add('show');
+    }
+
+    async function submitNewService() {
+        const assetId = document.getElementById('service-asset-id').value;
+        const newDate = document.getElementById('new-service-date').value;
+        if(!newDate) return showToast('Please select a valid date', 'error');
+        
+        closeModal('service-modal');
+        await updateAsset(assetId, 'serviceDate', newDate);
+    }
+
+</script>
+</body>
+</html>
